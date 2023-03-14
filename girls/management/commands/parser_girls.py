@@ -7,7 +7,7 @@ def get_urls_links():
     urls_links = set([])
     next = []
     url_trend = 'https://fapello.com/random/'
-    while len(urls_links) < 100:
+    while len(urls_links) < 50:
         response_trend = requests.get(url_trend)
         soup = BeautifulSoup(response_trend.content, 'html.parser')
         content_div = soup.find('div', id='content')
@@ -15,7 +15,7 @@ def get_urls_links():
         for a in a_tags:
             url_a = a['href']
             urls_links.add(url_a)
-            if len(urls_links) == 100:
+            if len(urls_links) == 50:
                 break
 
         div_page = soup.find('div', id='next_page')
@@ -48,23 +48,17 @@ class Command(BaseCommand):
             print(response)
             soup = BeautifulSoup(response.content, 'html.parser')
             user_name = soup.find('p')
-            print(user_name.text,"TTTTEEEEEEXXXXXTTTTTT")
+            p_url_fans = user_name.find_next('p')
+            if p_url_fans is not None and p_url_fans.a is not None \
+                    and p_url_fans.a['href'].startswith('https://onlyfans.com/'):
 
-            if ',' in user_name.text:
-                u = user_name.text.split(',')[0].strip()
-                print(u,'111111111111111111111111')
-                p_url_fans = user_name.find_next('p')
-                if p_url_fans is not None and p_url_fans.a is not None:
+                user_url_fans = p_url_fans.a['href']
+                if ',' in user_name.text:
+                    name = user_name.text.split(',')[0].strip()
+                    users_names.append({name:user_url_fans})
+                else:
                     user_url_fans = p_url_fans.a['href']
-                    if user_url_fans.startswith('https://onlyfans.com/'):
-                        users_names.append({u:user_url_fans})
-            else:
-                print(user_name.text,"222222222222222222222222222")
-                p_url_fans = user_name.find_next('p')
-                if p_url_fans is not None and p_url_fans.a is not None:
-                    user_url_fans = p_url_fans.a['href']
-                    if user_url_fans.startswith('https://onlyfans.com/'):
-                        users_names.append({user_name.text: user_url_fans})
+                    users_names.append({user_name.text: user_url_fans})
 
         for girl in users_names:
             girl_name, fans_url = girl.popitem()
