@@ -5,7 +5,7 @@ from girls.models import Girls
 
 def get_urls_links():
     urls_links = set([])
-    next = []
+    nexts_pages = []
     url_trend = 'https://fapello.com/random/'
     while len(urls_links) < 50:
         response_trend = requests.get(url_trend)
@@ -20,9 +20,9 @@ def get_urls_links():
 
         div_page = soup.find('div', id='next_page')
         next_page = div_page.a['href']
-        next.append(next_page)
+        nexts_pages.append(next_page)
         url_trend = next_page
-    print(len(urls_links), "LENNSSS LINKSSS")
+    print(len(urls_links), "LENS LINKS")
     return list(urls_links)
 
 def get_user_links():
@@ -33,7 +33,7 @@ def get_user_links():
         soup = BeautifulSoup(response.content, 'html.parser')
         div_elem = soup.find('div', class_='flex flex-1 items-center space-x-4')
         urls_users.append(div_elem.a['href'])
-    print(len(urls_users), "USERRR URLSSSS")
+    print(len(urls_users), "USER URLS")
     return urls_users
 
 class Command(BaseCommand):
@@ -54,15 +54,15 @@ class Command(BaseCommand):
 
                 user_url_fans = p_url_fans.a['href']
                 if ',' in user_name.text:
-                    name = user_name.text.split(',')[0].strip()
-                    users_names.append({name:user_url_fans})
+                    first_name = user_name.text.split(',')[0].strip()
+                    users_names.append({'username':first_name,'onlyfans': user_url_fans})
                 else:
                     user_url_fans = p_url_fans.a['href']
-                    users_names.append({user_name.text: user_url_fans})
+                    users_names.append({'username':user_name.text,'onlyfans': user_url_fans})
 
         for girl in users_names:
-            girl_name, fans_url = girl.popitem()
-            girl, created = Girls.objects.get_or_create(user_name=girl_name, onlyfans_url=fans_url)
+
+            girl, created = Girls.objects.get_or_create(user_name=girl['username'], onlyfans_url=girl['onlyfans'])
 
         self.stdout.write(self.style.SUCCESS('Comand add to datebase Success!!!'))
 
